@@ -1,6 +1,6 @@
 ﻿@model JoinIt.Web.ViewModels.NotificacoesDropdownViewModel
 
-<div class="dropdown"id="notificacoesDropdown">
+<div class="dropdown" id="notificacoesDropdown">
     <button type="button" class="btn nav-link notificacoes-navbar-button position-relative"
             data-bs-toggle="dropdown" aria-expanded="false" title="Notificações">
         <i class="bi bi-bell fs-5"></i>
@@ -29,23 +29,46 @@
             {
                 @foreach (var notificacao in Model.Notificacoes)
                 {
-                    <div class="notificacao-dropdown-item
-                                @(!notificacao.Lida
-                                    ? "notificacao-dropdown-nao-lida"
-                                    : "")"
-                         data-notificacao-id="@notificacao.Id"
-                         data-lida="@notificacao.Lida.ToString().ToLowerInvariant()">
-                        <div class="fw-semibold">
-                            @notificacao.Titulo
+                    @if (!string.IsNullOrWhiteSpace(notificacao.Link))
+                    {
+                        <a href="@notificacao.Link"
+                           class="notificacao-dropdown-item d-block w-100 text-decoration-none text-reset
+                            @(!notificacao.Lida
+                        ? "notificacao-dropdown-nao-lida"
+                        : "")"
+                           data-notificacao-id="@notificacao.Id"
+                           data-lida="@notificacao.Lida.ToString().ToLowerInvariant()">
+                            <div class="fw-semibold">
+                                @notificacao.Titulo
+                            </div>
+                            <div class="notificacao-dropdown-mensagem">
+                                @notificacao.Mensagem
+                            </div>
+                            <small class="text-muted">
+                                @notificacao.CriadoEm.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="notificacao-dropdown-item
+                            @(!notificacao.Lida
+                        ? "notificacao-dropdown-nao-lida"
+                        : "")"
+                             data-notificacao-id="@notificacao.Id"
+                             data-lida="@notificacao.Lida.ToString().ToLowerInvariant()">
+                            <div class="fw-semibold">
+                                @notificacao.Titulo
+                            </div>
+                            <div class="notificacao-dropdown-mensagem">
+                                @notificacao.Mensagem
+                            </div>
+                            <small class="text-muted">
+                                @notificacao.CriadoEm.ToString(
+                                    "dd/MM/yyyy HH:mm")
+                            </small>
                         </div>
-                        <div class="notificacao-dropdown-mensagem">
-                            @notificacao.Mensagem
-                        </div>
-                        <small class="text-muted">
-                            @notificacao.CriadoEm.ToString(
-                                "dd/MM/yyyy HH:mm")
-                        </small>
-                    </div>
+                    }
                 }
             }
         </div>

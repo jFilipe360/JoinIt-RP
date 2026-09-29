@@ -210,7 +210,7 @@ namespace JoinIt.Web.Pages.Perfil
         // Guarda a fotografia com um nome único na pasta pública de perfis
         private async Task<(string CaminhoRelativo, string CaminhoFisico)>GuardarFotoAsync(IFormFile foto)
         {
-            string pasta = Path.Combine(_environment.WebRootPath, "uploads", "perfis");
+            string pasta = ObterPastaFotos();
 
             Directory.CreateDirectory(pasta);
 
@@ -222,13 +222,11 @@ namespace JoinIt.Web.Pages.Perfil
 
             string caminhoFisico = Path.Combine(pasta, nomeFicheiro);
 
-            await using var stream =
-                new FileStream(caminhoFisico, FileMode.CreateNew);
+            await using var stream = new FileStream(caminhoFisico, FileMode.CreateNew);
 
             await foto.CopyToAsync(stream);
 
-            string caminhoRelativo =
-                $"/uploads/perfis/{nomeFicheiro}";
+            string caminhoRelativo = $"/uploads/perfis/{nomeFicheiro}";
 
             return (caminhoRelativo, caminhoFisico);
         }
@@ -250,8 +248,7 @@ namespace JoinIt.Web.Pages.Perfil
                 return;
             }
 
-            string nomeFicheiro =
-                Path.GetFileName(caminhoRelativo);
+            string nomeFicheiro = Path.GetFileName(caminhoRelativo);
 
             if (string.IsNullOrWhiteSpace(nomeFicheiro))
             {
@@ -259,15 +256,37 @@ namespace JoinIt.Web.Pages.Perfil
             }
 
             string caminhoFisico = Path.Combine(
-                _environment.WebRootPath,
-                "uploads",
-                "perfis",
+                ObterPastaFotos(),
                 nomeFicheiro);
 
             if (System.IO.File.Exists(caminhoFisico))
             {
                 System.IO.File.Delete(caminhoFisico);
             }
+        }
+
+        // Obtém uma pasta persistente para guardar fotografias de perfil.
+        private string ObterPastaFotos()
+        {
+            bool emAzure = !string.IsNullOrWhiteSpace(
+                Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID"));
+
+            string? home = Environment.GetEnvironmentVariable("HOME");
+
+            if (emAzure && !string.IsNullOrWhiteSpace(home))
+            {
+                return Path.Combine(
+                    home,
+                    "data",
+                    "JoinIt",
+                    "uploads",
+                    "perfis");
+            }
+
+            return Path.Combine(
+                _environment.WebRootPath,
+                "uploads",
+                "perfis");
         }
     }
 }

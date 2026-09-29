@@ -4,6 +4,7 @@ using JoinIt.Web.Models;
 using JoinIt.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,29 @@ else
 }
 
 app.UseHttpsRedirection();
+
+// No Azure, serve as fotografias a partir do armazenamento persistente do App Service.
+bool emAzure = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID"));
+
+string? azureHome = Environment.GetEnvironmentVariable("HOME");
+
+if (emAzure && !string.IsNullOrWhiteSpace(azureHome))
+{
+    string pastaFotos = Path.Combine(
+        azureHome,
+        "data",
+        "JoinIt",
+        "uploads",
+        "perfis");
+
+    Directory.CreateDirectory(pastaFotos);
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(pastaFotos),
+        RequestPath = "/uploads/perfis"
+    });
+}
 
 // Apresenta a página personalizada para respostas HTTP como 403 e 404
 app.UseStatusCodePagesWithReExecute("/Erro/{0}");
